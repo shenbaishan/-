@@ -1,29 +1,91 @@
-# Compiled Object files
-*.slo
-*.lo
-*.o
-*.obj
+#pragma warning (disable:4996)
+#include <iostream>
+#include <map>
+#include <vector>
+#include <algorithm>
+#include <string.h>
+#include <time.h>
 
-# Precompiled Headers
-*.gch
-*.pch
+using namespace std;
 
-# Compiled Dynamic libraries
-*.so
-*.dylib
-*.dll
+unsigned long Total;
+class String
+{
+public:
+	String(char *Word) :Frequency(1)
+	{
 
-# Fortran module files
-*.mod
-*.smod
+		Word_Point = new char[strlen(Word) + 1];
+		strcpy(Word_Point, Word);
+	}
+	char *Word_Point;
+	int Frequency;
+	bool operator<(String STR);
+	~String(){}
+};
 
-# Compiled Static libraries
-*.lai
-*.la
-*.a
-*.lib
+bool String::operator<(String STR){ return Frequency < STR.Frequency; }
 
-# Executables
-*.exe
-*.out
-*.app
+vector<String>  Sort_Word;
+
+void If_Repet(char *WordP)
+{
+	vector<String>::iterator iter;
+	for (iter = Sort_Word.begin(); iter != Sort_Word.end(); iter++)
+	if (!strcmp(iter->Word_Point, WordP))
+	{
+		Total++;
+		iter->Frequency++;
+		return;
+	}
+	Sort_Word.push_back(String(WordP));
+}
+
+void Catch_Letter(char *File_P)
+{
+	char *Wor_Po = (char *)malloc(4);
+	FILE *Article = fopen(File_P, "r");
+	char *Letter_Point;
+	while (!feof(Article))
+	{
+		fscanf(Article, "%s", Wor_Po);
+		Letter_Point = Wor_Po;
+		while (*Letter_Point++)
+		{
+			if (*Letter_Point == ',' || *Letter_Point == '.')
+				*Letter_Point = 0;
+		}
+		If_Repet(Wor_Po);
+	}
+}
+
+void Stat_Alone(char *Master_P)
+{
+		Catch_Letter(Master_P);
+		sort(Sort_Word.begin(), Sort_Word.end());
+		cout << "total :" << Total << endl << endl;
+		for (vector<String>::iterator iter = Sort_Word.begin(); iter != Sort_Word.end(); iter++)
+			printf("Word : %-15s Frequency :%d\n", iter->Word_Point, iter->Frequency);
+		Total = 0;
+		Sort_Word.clear();
+}
+
+void main(int argv ,char **argc)
+{
+	time_t start = clock();
+	if (strcmp(argc[1], "folder"))	Stat_Alone(argc[1]);
+	else
+	{
+		char *Folder = (char *)malloc(40*sizeof(int));
+		FILE *Folder_P = fopen("folder.txt" ,"r");
+		while (!feof(Folder_P))
+		{
+			if (feof(Folder_P)) break;
+			
+			fscanf(Folder_P, "%s", Folder);
+			Stat_Alone(strcat(Folder, "\\article.txt"));
+		}
+	}
+	printf("Use time: %.0f ms" ,double(clock() - start)*1000/CLOCKS_PER_SEC);
+	getchar();
+}
